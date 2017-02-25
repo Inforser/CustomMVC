@@ -12,7 +12,7 @@
             RegisterControllers();
             RegisteViews();
             RegisterModels();
-
+           
             try
             {
                 server.Listen();
@@ -26,7 +26,7 @@
 
         private static void RegisterAssemblyName()
         {
-            MvcContext.Current.AssemblyName = Assembly.GetCallingAssembly().GetName().Name;
+            MvcContext.Current.AssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
         }
 
         private static void RegisterControllers()
