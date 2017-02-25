@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CustomMVC.Core.Interfaces
+﻿namespace CustomMVC.Core.Interfaces
 {
-    interface IHandleable
+    using CustomHttpServer.Models;
+
+    public interface IHandleable
     {
+        HttpResponse Handle(HttpRequest request);
     }
 }
