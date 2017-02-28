@@ -11,8 +11,9 @@
         public HttpServer(int port, IEnumerable<Route> routes)
         {
             this.Port = port;
-            this.Processor = new HttpProcessor(routes);
             this.IsActive = true;
+            this.Sessions = new Dictionary<string, HttpSession>();
+            this.Processor = new HttpProcessor(routes, this.Sessions);
         }
 
         public TcpListener Listener { get; private set; }
@@ -22,6 +23,8 @@
         public HttpProcessor Processor { get; }
 
         public bool IsActive { get; }
+
+        public IDictionary<string, HttpSession> Sessions { get; }
 
         public void Listen()
         {
@@ -34,6 +37,7 @@
                 {
                     this.Processor.HandleClient(client);
                 });
+
                 thread.Start();
                 Thread.Sleep(1);
             }

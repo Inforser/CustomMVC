@@ -1,5 +1,8 @@
-﻿namespace CustomHttpServer.Models
+﻿// ReSharper disable UseStringInterpolation
+
+namespace CustomHttpServer.Models
 {
+    using System;
     using CustomHttpServer.Enums;
 
     public class HttpRequest
@@ -16,10 +19,16 @@
         public string Content { get; set; }
 
         public Header Header { get; set; }
-        
+
+        public HttpSession Session { get; set; }
+
         public override string ToString()
         {
-            return $"{this.Method} {this.Url} HTTP/1.0\r\n{this.Header}{this.Content}";
+            return string.Format("{0} {1} HTTP/1.0\r\n{2}{3}",
+                this.Method,
+                this.Url,
+                this.Header,
+                this.Content);
         }
     }
 }

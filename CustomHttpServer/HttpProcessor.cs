@@ -19,10 +19,13 @@ namespace CustomHttpServer
         private readonly IList<Route> routes;
         private HttpRequest request;
         private HttpResponse response;
+        private readonly IDictionary<string, HttpSession> sessionsMap;
 
-        public HttpProcessor(IEnumerable<Route> routes)
+        public HttpProcessor(IEnumerable<Route> routes,
+            IDictionary<string, HttpSession> sessions)
         {
             this.routes = new List<Route>(DefaultRoutes.AppendDefaultRoutes(routes));
+            this.sessionsMap = sessions;
         }
 
         public void HandleClient(TcpClient tcpClient)
@@ -46,7 +49,7 @@ namespace CustomHttpServer
             string[] tokens = requestLine.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
             if (tokens.Length != 3)
             {
-                throw new Exception("Invalid http request line");
+                throw new Exception("Invalid http request line!");
             }
 
             var method = (RequestMethod) Enum.Parse(typeof(RequestMethod), tokens[0].ToUpper());
@@ -64,6 +67,16 @@ namespace CustomHttpServer
                 Header = header,
                 Content = content
             };
+
+            if (resultRequest.Header.Cookies.ContainsKey("sessionId"))
+            {
+                var sessionId = resultRequest.Header.Cookies["sessionId"].Value;
+                resultRequest.Session = new HttpSession(sessionId);
+                if (!this.sessionsMap.ContainsKey(sessionId))
+                {
+                    this.sessionsMap.Add(sessionId, resultRequest.Session);
+                }
+            }
 
             Console.WriteLine("-REQUEST-----------------------------");
             Console.WriteLine(resultRequest);
@@ -165,7 +178,21 @@ namespace CustomHttpServer
             
             try
             {
-                return route.Callable(this.request);
+                HttpResponse resultResponse;
+                if (!this.request.Header.Cookies.ContainsKey("sessionId") || this.request.Session == null)
+                {
+                    var session = SessionCreator.Create();
+                    var sessionCookie = new Cookie("sessionId", session.Id + "; HttpOnly; path=/");
+                    this.request.Session = session;
+                    resultResponse = route.Callable(this.request);
+                    resultResponse.Header.AddCookie(sessionCookie);
+                }
+                else
+                {
+                    resultResponse = route.Callable(this.request);
+                }
+
+                return resultResponse;
             }
             catch (Exception ex)
             {
