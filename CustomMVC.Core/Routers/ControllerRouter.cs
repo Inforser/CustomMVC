@@ -143,6 +143,16 @@
                     );
                     index++;
                 }
+                else if (param.ParameterType == typeof(HttpRequest))
+                {
+                    this.methodParams[index] = request;
+                    index++;
+                }
+                else if (param.ParameterType == typeof(HttpSession))
+                {
+                    this.methodParams[index] = request.Session;
+                    index++;
+                }
                 else
                 {
                     Type bindingModelType = param.ParameterType;
