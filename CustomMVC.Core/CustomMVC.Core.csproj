@@ -59,12 +59,11 @@
     <Compile Include="ViewEngine\Generic\ActionResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CustomHttpServer\CustomHttpServer.csproj">
+    <ProjectReference Include="..\..\CustomHttpServer\CustomHttpServer\CustomHttpServer.csproj">
       <Project>{14a2faf3-89fd-4007-91fb-f51e7efe5978}</Project>
       <Name>CustomHttpServer</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

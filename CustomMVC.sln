@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomMVC.Core", "CustomMVC.Core\CustomMVC.Core.csproj", "{4C43B8DE-0162-44AB-9DD6-A04FC1B5F634}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomHttpServer", "CustomHttpServer\CustomHttpServer.csproj", "{14A2FAF3-89FD-4007-91FB-F51E7EFE5978}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomHttpServer", "..\CustomHttpServer\CustomHttpServer\CustomHttpServer.csproj", "{14A2FAF3-89FD-4007-91FB-F51E7EFE5978}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

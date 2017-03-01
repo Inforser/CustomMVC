@@ -24,43 +24,50 @@
         private string[] controllerActionParams;
         private string[] controllerAction;
 
+        private HttpRequest request;
+        private HttpResponse response;
+
         public ControllerRouter()
         {
+            this.request = new HttpRequest();
+            this.response = new HttpResponse();
             this.getParams = new Dictionary<string, string>();
             this.postParams = new Dictionary<string, string>();
         }
 
         public HttpResponse Handle(HttpRequest request)
         {
-            this.ParseInput(request);
+            this.request = request;
+            this.response = new HttpResponse();
+            this.ParseInput();
             //TODO check if there is session with given id and execute the method only if user is authorised
 
-            var method = this.GetMethod();
+            var method = this.GetMethod(); // method aka action
             var controller = this.GetController();
+
             IInvocable result =
                 (IInvocable) method
                     .Invoke(controller, this.methodParams);
 
-            string content = result.Invoke();
-            var response = new HttpResponse()
+            if (string.IsNullOrEmpty(this.response.Header.Location))
             {
-                ContentAsUtf8 = content,
-                StatusCode = ResponseStatusCode.OK
-            };
+                this.response.ContentAsUtf8 = result.Invoke();
+                this.response.StatusCode = ResponseStatusCode.OK;
+            }
 
             this.ClearRequestParameters();
-            return response;
+            return this.response;
         }
 
         private void ClearRequestParameters()
         {
-            this.postParams = new Dictionary<string, string>();
             this.getParams = new Dictionary<string, string>();
+            this.postParams = new Dictionary<string, string>();
         }
 
-        private void InitRequestMethod(HttpRequest request)
+        private void InitRequestMethod()
         {
-            this.requestMethod = request.Method.ToString();
+            this.requestMethod = this.request.Method.ToString();
         }
 
         private void InitControllerName()
@@ -74,17 +81,18 @@
             this.actionName = this.controllerAction[this.controllerAction.Length - 1].ToUpperFirst();
         }
 
-        public void ParseInput(HttpRequest request)
+        public void ParseInput()
         {
-            string uri = WebUtility.UrlDecode(request.Url);
+            string uri = WebUtility.UrlDecode(this.request.Url);
             string query = string.Empty;
-            if (request.Url.Contains("?"))
+            if (this.request.Url.Contains("?"))
             {
-                query = request.Url.Split('?')[1];
+                query = this.request.Url.Split('?')[1];
             }
 
             this.controllerActionParams = uri.Split('?');
-            this.controllerAction = this.controllerActionParams[0].Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            this.controllerAction = this.controllerActionParams[0].Split(new[] {'/'},
+                StringSplitOptions.RemoveEmptyEntries);
             this.controllerActionParams = query.Split('&');
 
             //Retrieve GET parameters
@@ -92,16 +100,14 @@
             {
                 foreach (var pair in this.controllerActionParams)
                 {
-                    if (pair.Contains("="))
-                    {
-                        string[] keyValue = pair.Split('=');
-                        this.getParams.Add(keyValue[0], keyValue[1]);
-                    }
+                    if (!pair.Contains("=")) continue;
+                    string[] keyValue = pair.Split('=');
+                    this.getParams.Add(keyValue[0], keyValue[1]);
                 }
             }
 
             //Retrieve POST parameters
-            string postParameters = request.Content;
+            string postParameters = this.request.Content;
             if (postParameters != null)
             {
                 postParameters = WebUtility.UrlDecode(postParameters);
@@ -113,7 +119,7 @@
                 }
             }
 
-            this.InitRequestMethod(request);
+            this.InitRequestMethod();
             this.InitControllerName();
             this.InitActionName();
 
@@ -145,12 +151,17 @@
                 }
                 else if (param.ParameterType == typeof(HttpRequest))
                 {
-                    this.methodParams[index] = request;
+                    this.methodParams[index] = this.request;
                     index++;
                 }
                 else if (param.ParameterType == typeof(HttpSession))
                 {
-                    this.methodParams[index] = request.Session;
+                    this.methodParams[index] = this.request.Session;
+                    index++;
+                }
+                else if (param.ParameterType == typeof(HttpResponse))
+                {
+                    this.methodParams[index] = this.response;
                     index++;
                 }
                 else
@@ -205,7 +216,6 @@
 
         private MethodInfo GetMethod()
         {
-            MethodInfo method = null;
             foreach (MethodInfo methodInfo in this.GetSuitableMethods())
             {
                 IEnumerable<Attribute> attributes = methodInfo
@@ -226,7 +236,7 @@
                 }
             }
 
-            return method;
+            return null;
         }
     }
 }

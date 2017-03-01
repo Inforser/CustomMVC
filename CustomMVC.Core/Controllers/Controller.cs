@@ -3,6 +3,8 @@
 namespace CustomMVC.Core.Controllers
 {
     using System.Runtime.CompilerServices;
+    using CustomHttpServer.Enums;
+    using CustomHttpServer.Models;
     using CustomMVC.Core.Interfaces;
     using CustomMVC.Core.Interfaces.Generic;
     using CustomMVC.Core.ViewEngine;
@@ -64,6 +66,12 @@ namespace CustomMVC.Core.Controllers
                 action);
 
             return new ActionResult<T>(fullQualifiedName, model);
+        }
+
+        public void Redirect(HttpResponse response, string location)
+        {
+            response.Header.Location = location;
+            response.StatusCode = ResponseStatusCode.Found;
         }
     }
 }
