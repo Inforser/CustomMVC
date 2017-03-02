@@ -8,6 +8,7 @@
     {
         public static void Run(HttpServer server)
         {
+            RegisterAssembly();
             RegisterAssemblyName();
             RegisterControllers();
             RegisteViews();
@@ -24,9 +25,14 @@
             }
         }
 
+        private static void RegisterAssembly()
+        {
+            MvcContext.Current.EntryAssembly = Assembly.GetEntryAssembly();
+        }
+
         private static void RegisterAssemblyName()
         {
-            MvcContext.Current.AssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+            MvcContext.Current.AssemblyName = Assembly.GetEntryAssembly().GetName().Name;
         }
 
         private static void RegisterControllers()

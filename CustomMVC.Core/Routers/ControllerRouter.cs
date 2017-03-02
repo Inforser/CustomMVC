@@ -200,9 +200,10 @@
                 MvcContext.Current.AssemblyName,
                 MvcContext.Current.ControllersFolder,
                 this.controllerName);
-
-            var controller =
-                (Controller) Activator.CreateInstance(Type.GetType(controllerType));
+            
+            var type = MvcContext.Current.EntryAssembly.GetType(controllerType);
+            var controller = (Controller) Activator.CreateInstance(type);
+            
             return controller;
         }
 
